@@ -1,0 +1,130 @@
+@model List<UserTask>
+
+@{
+    ViewData["Title"] = "IT Dashboard";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+
+<button class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">Add New Task</button>
+
+<h3>Task List</h3>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var task in Model)
+            {
+                <tr>
+                    <td>@task.Title</td>
+                    <td>@task.Description</td>
+                    <td>@task.Category</td>
+                    <td>
+                        @{
+                            switch (task.Status)
+                            {
+                                case "Idle":
+                                    <text>Idle</text>;
+                                    break;
+                                case "Started":
+                                    <text>Started</text>;
+                                    break;
+                                case "Completed":
+                                    <text>Completed: @task.FinishedDate?.ToShortDateString()</text>;
+                                    break;
+                                default:
+                                    <text>Unknown</text>;
+                                    break;
+                            }
+                        }
+                    </td>
+                    <td>@task.UserId</td>
+                    <td>
+                        @if (task.User != null)
+                        {
+                            @task.User.UserName
+                        }
+                        else
+                        {
+                            <span>No user assigned</span>
+                        }
+                    </td>
+                    <td>
+                        <form method="post" action="@Url.Action("EditTask", "ITDashboard")" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="taskId" value="@task.Id" />
+                            <div class="form-group">
+                                <input type="number" name="userId" value="@task.UserId" class="form-control" required />
+                            </div>
+                            <button type="submit" class="btn btn-warning">Update User</button>
+                        </form>
+
+                        <form method="post" action="@Url.Action("RemoveTask", "ITDashboard")" style="display:inline;">
+                            <input type="hidden" name="taskId" value="@task.Id" />
+                            <button type="submit" class="btn btn-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No tasks available.</p>
+}
+
+        <form method="post" asp-action="AddTask" asp-controller="ITDashboard">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label for="UserId">Assign to User</label>
+                    <input type="number" class="form-control" id="UserId" name="UserId" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="Title">Task Title</label>
+                    <input type="text" class="form-control" id="Title" name="Title" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="Description">Task Description</label>
+                    <textarea class="form-control" id="Description" name="Description" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="Category">Category</label>
+                    <select class="form-control" id="Category" name="Category" required>
+                        <option value="Design">Design</option>
+                        <option value="Software">Software</option>
+                        <option value="HR">HR</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="Status">Status</label>
+                    <select class="form-control" id="Status" name="Status" required>
+                        <option value="Idle">Idle</option>
+                        <option value="Started">Started</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </form>
+        </div>
+    </div>
+</div>
